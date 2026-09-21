@@ -9,8 +9,11 @@ import java.math.BigDecimal;
 @Data
 public class Product {
 
+    /** SKU — unique id (A, B, C, ...). */
     private String id;
+
     private String name;
+
+    /** Unit price in pence. */
     private BigDecimal price;
-    private PromotionType promotionType;
 }

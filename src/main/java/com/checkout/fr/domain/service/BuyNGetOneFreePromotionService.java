@@ -1,6 +1,6 @@
 package com.checkout.fr.domain.service;
 
-import com.checkout.fr.domain.model.MultiPricedPromotion;
+import com.checkout.fr.domain.model.BuyNGetOneFreePromotion;
 import com.checkout.fr.domain.model.PricingRules;
 import com.checkout.fr.domain.model.Product;
 import com.checkout.fr.domain.model.PromotionType;
@@ -12,41 +12,35 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class MultiPricedPromotionService implements PromotionService {
+public class BuyNGetOneFreePromotionService implements PromotionService {
 
     @Override
     public PromotionType getType() {
-        return PromotionType.MULTI_PRICED;
+        return PromotionType.BUY_N_GET_ONE_FREE;
     }
 
     @Override
     public List<PromotionResult> apply(Map<String, Integer> quantities, PricingRules rules) {
         List<PromotionResult> results = new ArrayList<>();
 
-        for (MultiPricedPromotion promotion : rules.promotionsOfType(MultiPricedPromotion.class)) {
+        for (BuyNGetOneFreePromotion promotion : rules.promotionsOfType(BuyNGetOneFreePromotion.class)) {
             int quantity = quantities.getOrDefault(promotion.getProductId(), 0);
             if (quantity <= 0) {
                 continue;
             }
 
-            int groupSize = promotion.getQuantity();
-            int groups = quantity / groupSize;
-            if (groups == 0) {
+            int blockSize = promotion.getBuyQuantity() + 1;
+            int freeItems = quantity / blockSize;
+            if (freeItems == 0) {
                 continue;
             }
 
             Product product = rules.requireProduct(promotion.getProductId());
-            int promotedQty = groups * groupSize;
-            BigDecimal unitTotal = product.getPrice().multiply(BigDecimal.valueOf(promotedQty));
-            BigDecimal promoTotal = promotion.getSpecialPrice().multiply(BigDecimal.valueOf(groups));
-            BigDecimal discount = unitTotal.subtract(promoTotal);
-
-            if (discount.signum() <= 0) {
-                continue;
-            }
+            int affectedQty = freeItems * blockSize;
+            BigDecimal discount = product.getPrice().multiply(BigDecimal.valueOf(freeItems));
 
             results.add(new PromotionResult(
-                    List.of(new AffectedItem(promotion.getProductId(), promotedQty)),
+                    List.of(new AffectedItem(promotion.getProductId(), affectedQty)),
                     discount));
         }
 
