@@ -1,8 +1,7 @@
 package com.checkout.fr.domain.model;
 
-import lombok.Getter;
-
 import java.math.BigDecimal;
+import lombok.Getter;
 
 @Getter
 public class MultiPricedPromotion extends Promotion {

@@ -1,9 +1,8 @@
 package com.checkout.fr.domain.model;
 
-import lombok.Getter;
-
 import java.math.BigDecimal;
 import java.util.Set;
+import lombok.Getter;
 
 @Getter
 public class MealDealPromotion extends Promotion {

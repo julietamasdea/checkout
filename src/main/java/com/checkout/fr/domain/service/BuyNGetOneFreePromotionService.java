@@ -4,46 +4,45 @@ import com.checkout.fr.domain.model.BuyNGetOneFreePromotion;
 import com.checkout.fr.domain.model.PricingRules;
 import com.checkout.fr.domain.model.Product;
 import com.checkout.fr.domain.model.PromotionType;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-@Service
+/** Buy N get 1 free: for every block of (N + 1) items, one is free. */
 public class BuyNGetOneFreePromotionService implements PromotionService {
 
-    @Override
-    public PromotionType getType() {
-        return PromotionType.BUY_N_GET_ONE_FREE;
-    }
+  @Override
+  public PromotionType getType() {
+    return PromotionType.BUY_N_GET_ONE_FREE;
+  }
 
-    @Override
-    public List<PromotionResult> apply(Map<String, Integer> quantities, PricingRules rules) {
-        List<PromotionResult> results = new ArrayList<>();
+  @Override
+  public BigDecimal discount(Map<String, Integer> quantities, PricingRules rules) {
+    return rules.promotionsOfType(BuyNGetOneFreePromotion.class).stream()
+        .map(promotion -> discountFor(promotion, quantities, rules))
+        .reduce(BigDecimal.ZERO, BigDecimal::add);
+  }
 
-        for (BuyNGetOneFreePromotion promotion : rules.promotionsOfType(BuyNGetOneFreePromotion.class)) {
-            int quantity = quantities.getOrDefault(promotion.getProductId(), 0);
-            if (quantity <= 0) {
-                continue;
-            }
+  private BigDecimal discountFor(
+      BuyNGetOneFreePromotion promotion, Map<String, Integer> quantities, PricingRules rules) {
 
-            int blockSize = promotion.getBuyQuantity() + 1;
-            int freeItems = quantity / blockSize;
-            if (freeItems == 0) {
-                continue;
-            }
+    return Optional.of(quantities.getOrDefault(promotion.getProductId(), 0))
+        .map(quantityInBasket -> countFreeItems(quantityInBasket, promotion.getBuyQuantity()))
+        .filter(freeItems -> freeItems > 0)
+        .map(
+            freeItems ->
+                discountForFreeItems(
+                    rules.requireProduct(promotion.getProductId()), freeItems))
+        .filter(discount -> discount.signum() > 0)
+        .orElse(BigDecimal.ZERO);
+  }
 
-            Product product = rules.requireProduct(promotion.getProductId());
-            int affectedQty = freeItems * blockSize;
-            BigDecimal discount = product.getPrice().multiply(BigDecimal.valueOf(freeItems));
+  private int countFreeItems(int quantityInBasket, int buyQuantity) {
+    int blockSize = buyQuantity + 1;
+    return (quantityInBasket <= 0 || buyQuantity <= 0) ? 0 : quantityInBasket / blockSize;
+  }
 
-            results.add(new PromotionResult(
-                    List.of(new AffectedItem(promotion.getProductId(), affectedQty)),
-                    discount));
-        }
-
-        return results;
-    }
+  private BigDecimal discountForFreeItems(Product product, int freeItems) {
+    return product.getPrice().multiply(BigDecimal.valueOf(freeItems));
+  }
 }

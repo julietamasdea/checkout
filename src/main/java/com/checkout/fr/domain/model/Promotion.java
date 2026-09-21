@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public abstract class Promotion {
 
-    private final PromotionType promotionType;
+  private final PromotionType promotionType;
 
-    protected Promotion(PromotionType promotionType) {
-        this.promotionType = promotionType;
-    }
+  protected Promotion(PromotionType promotionType) {
+    this.promotionType = promotionType;
+  }
 }
