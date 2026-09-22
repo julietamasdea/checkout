@@ -172,7 +172,7 @@ class CheckoutUseCaseTest {
     void differentRulesChangeTotal() {
       PricingRules otherWeek =
           new PricingRules(
-              List.of(Product.builder().id("A").price(BigDecimal.valueOf(50)).build()),
+              List.of(new Product("A", BigDecimal.valueOf(50))),
               List.of(new MultiPricedPromotion("A", 2, BigDecimal.valueOf(80))));
 
       CheckoutUseCase otherCheckout = CheckoutFactory.start(otherWeek);

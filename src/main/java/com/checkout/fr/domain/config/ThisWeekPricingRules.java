@@ -17,11 +17,11 @@ public final class ThisWeekPricingRules {
   public static PricingRules create() {
     return new PricingRules(
         List.of(
-            Product.builder().id("A").price(BigDecimal.valueOf(50)).build(),
-            Product.builder().id("B").price(BigDecimal.valueOf(75)).build(),
-            Product.builder().id("C").price(BigDecimal.valueOf(25)).build(),
-            Product.builder().id("D").price(BigDecimal.valueOf(150)).build(),
-            Product.builder().id("E").price(BigDecimal.valueOf(200)).build()),
+            new Product("A", BigDecimal.valueOf(50)),
+            new Product("B", BigDecimal.valueOf(75)),
+            new Product("C", BigDecimal.valueOf(25)),
+            new Product("D", BigDecimal.valueOf(150)),
+            new Product("E", BigDecimal.valueOf(200))),
         List.of(
             new MultiPricedPromotion("A", 3, BigDecimal.valueOf(130)),
             new MultiPricedPromotion("B", 2, BigDecimal.valueOf(125)),
