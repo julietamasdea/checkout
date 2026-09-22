@@ -1,5 +1,6 @@
 package com.checkout.fr.domain.model;
 
+import com.checkout.fr.domain.model.exception.InvalidProductException;
 import com.checkout.fr.domain.model.promotion.Promotion;
 import java.util.Collection;
 import java.util.List;
@@ -37,12 +38,9 @@ public class PricingRules {
   public Product requireProduct(String sku) {
     Product product = products.get(sku);
     if (product == null) {
-      throw new IllegalArgumentException("Unknown product: " + sku);
+      throw new InvalidProductException("Unknown product: " + sku);
     }
     return product;
   }
 
-  public <T extends Promotion> List<T> promotionsOfType(Class<T> type) {
-    return promotions.stream().filter(type::isInstance).map(type::cast).toList();
-  }
 }

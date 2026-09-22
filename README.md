@@ -31,3 +31,8 @@ curl -s -X POST http://localhost:8080/checkout \
 - Domain: `Promotion.discount(...)`, `CheckoutUseCase`, injectable `PricingRules`.
 - API: stateless `POST /checkout` with the full SKU list → `{ "total" }`.
 - UI: `frontend/` — add/remove SKUs, refresh total from the API.
+
+## Trade-offs and known gaps
+
+- **Validations** (positive unit prices, positive quantities, non-empty/known SKUs beyond the happy path) were not implemented due to time. I still consider them important for a real checkout: bad input should fail fast and clearly rather than produce a wrong total.
+- **Full-list recalculation**: each request recomputes the total from the entire basket. An incremental model (update totals as items are added one by one) could be more efficient for large baskets or live scanning, but it needs more state and complexity (session/cart lifecycle, undo, promo recalculation). The brief asked for a total given items, not a long-lived cart, so the simpler stateless approach was preferred over over-engineering.

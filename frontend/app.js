@@ -31,7 +31,7 @@ function render() {
     li.innerHTML = `<span>${sku}</span>`;
     const removeBtn = document.createElement("button");
     removeBtn.type = "button";
-    removeBtn.textContent = "sacar";
+    removeBtn.textContent = "remove";
     removeBtn.addEventListener("click", () => removeAt(index));
     li.appendChild(removeBtn);
     cartEl.appendChild(li);
@@ -63,7 +63,7 @@ async function refreshTotal() {
     totalEl.textContent = "—";
     errorEl.hidden = false;
     errorEl.textContent =
-      "No se pudo calcular. ¿Está corriendo el API en :8080?";
+      "Could not calculate. Is the API running on :8080?";
   }
 }
 
