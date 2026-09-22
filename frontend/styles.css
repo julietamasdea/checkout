@@ -1,0 +1,134 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+main {
+  max-width: 28rem;
+  margin: 2rem auto;
+  padding: 0 1rem 2rem;
+}
+
+h1 {
+  margin: 0 0 0.35rem;
+  font-size: 1.5rem;
+}
+
+h2 {
+  margin: 1.5rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.hint,
+.muted {
+  color: #71717a;
+  font-size: 0.9rem;
+}
+
+.products {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.promos {
+  margin-top: 1.25rem;
+}
+
+.promos table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.promos th,
+.promos td {
+  text-align: left;
+  padding: 0.45rem 0.65rem;
+  border-bottom: 1px solid #f4f4f5;
+}
+
+.promos th {
+  background: #fafafa;
+  color: #52525b;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.promos tr:last-child td {
+  border-bottom: none;
+}
+
+.products button {
+  min-width: 2.75rem;
+  padding: 0.6rem 0.85rem;
+  border: 1px solid #d4d4d8;
+  border-radius: 6px;
+  background: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.products button:hover {
+  background: #fafafa;
+}
+
+#cart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+#cart li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 0.35rem;
+  background: #fff;
+  border: 1px solid #e4e4e7;
+  border-radius: 6px;
+}
+
+#cart button {
+  border: none;
+  background: transparent;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.total-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  background: #18181b;
+  color: #fafafa;
+  border-radius: 8px;
+}
+
+.total-box strong {
+  font-size: 1.25rem;
+}
+
+.error {
+  margin-top: 0.75rem;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}

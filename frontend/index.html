@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Checkout</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main>
+    <h1>Checkout</h1>
+    <p class="hint">Agregá o sacá ítems. El total se calcula con el API.</p>
+
+    <section class="promos">
+      <h2>Promos de esta semana</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Item</th>
+            <th>Precio</th>
+            <th>Oferta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>A</td>
+            <td>50 p</td>
+            <td>3 por 130 p</td>
+          </tr>
+          <tr>
+            <td>B</td>
+            <td>75 p</td>
+            <td>2 por 125 p</td>
+          </tr>
+          <tr>
+            <td>C</td>
+            <td>25 p</td>
+            <td>Comprá 3, 1 gratis</td>
+          </tr>
+          <tr>
+            <td>D</td>
+            <td>150 p</td>
+            <td rowspan="2">D + E por 300 p</td>
+          </tr>
+          <tr>
+            <td>E</td>
+            <td>200 p</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="products">
+      <button type="button" data-sku="A">A · 50</button>
+      <button type="button" data-sku="B">B · 75</button>
+      <button type="button" data-sku="C">C · 25</button>
+      <button type="button" data-sku="D">D · 150</button>
+      <button type="button" data-sku="E">E · 200</button>
+    </section>
+
+    <section>
+      <h2>Lista</h2>
+      <ul id="cart"></ul>
+      <p id="empty" class="muted">Vacía</p>
+    </section>
+
+    <section class="total-box">
+      <span>Total</span>
+      <strong id="total">0 p</strong>
+    </section>
+
+    <p id="error" class="error" hidden></p>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
