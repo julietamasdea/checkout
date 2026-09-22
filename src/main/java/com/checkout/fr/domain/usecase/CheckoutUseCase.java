@@ -1,8 +1,8 @@
 package com.checkout.fr.domain.usecase;
 
 import com.checkout.fr.domain.model.PricingRules;
+import com.checkout.fr.domain.model.exception.InvalidProductException;
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,30 +13,28 @@ import java.util.Map;
 public class CheckoutUseCase {
 
   private final PricingRules pricingRules;
-  private final Map<String, Integer> scannedItems = new HashMap<>();
-  private BigDecimal finalPrice = BigDecimal.ZERO;
 
   public CheckoutUseCase(PricingRules pricingRules) {
     this.pricingRules = pricingRules;
   }
 
-  public void addProduct(String productId) {
+  /** Calculates the total from a quantity map (sku → count). */
+  public BigDecimal process(Map<String, Integer> quantities) {
+    quantities.keySet().forEach(this::requireKnown);
+    return recalculate(quantities);
+  }
+
+  private void requireKnown(String productId) {
     if (!pricingRules.contains(productId)) {
-      throw new IllegalArgumentException("Unknown product: " + productId);
+      throw new InvalidProductException("Unknown product: " + productId);
     }
-    scannedItems.merge(productId, 1, Integer::sum);
-    finalPrice = recalculate();
   }
 
-  public BigDecimal total() {
-    return finalPrice;
+  private BigDecimal recalculate(Map<String, Integer> scannedItems) {
+    return unitTotal(scannedItems).subtract(totalDiscount(scannedItems));
   }
 
-  private BigDecimal recalculate() {
-    return unitTotal().subtract(totalDiscount());
-  }
-
-  private BigDecimal unitTotal() {
+  private BigDecimal unitTotal(Map<String, Integer> scannedItems) {
     return scannedItems.entrySet().stream()
         .map(
             entry ->
@@ -47,7 +45,7 @@ public class CheckoutUseCase {
         .reduce(BigDecimal.ZERO, BigDecimal::add);
   }
 
-  private BigDecimal totalDiscount() {
+  private BigDecimal totalDiscount(Map<String, Integer> scannedItems) {
     return pricingRules.getPromotions().stream()
         .map(promotion -> promotion.discount(scannedItems, pricingRules))
         .reduce(BigDecimal.ZERO, BigDecimal::add);

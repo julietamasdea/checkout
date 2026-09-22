@@ -4,11 +4,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.checkout.fr.domain.config.ThisWeekPricingRules;
-import com.checkout.fr.domain.model.MultiPricedPromotion;
 import com.checkout.fr.domain.model.PricingRules;
 import com.checkout.fr.domain.model.Product;
+import com.checkout.fr.domain.model.exception.InvalidProductException;
+import com.checkout.fr.domain.model.promotion.MultiPricedPromotion;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -26,34 +28,27 @@ class CheckoutUseCaseTest {
   @Test
   @DisplayName("empty basket costs 0")
   void emptyCheckoutIsZero() {
-    assertTotal(0);
+    assertProcess(Map.of(), 0);
   }
 
   @Test
   @DisplayName("items without a full offer use unit price")
   void singleItemsUseUnitPrice() {
-    checkout.addProduct("A");
-    checkout.addProduct("C");
-    assertTotal(75);
+    assertProcess(Map.of("A", 1, "C", 1), 75);
   }
 
   @Test
   @DisplayName("unknown SKU is rejected")
   void unknownSkuIsRejected() {
-    assertThrows(IllegalArgumentException.class, () -> checkout.addProduct("Z"));
+    assertThrows(InvalidProductException.class, () -> checkout.process(Map.of("Z", 1)));
   }
 
   @Test
-  @DisplayName("total updates after every addProduct")
-  void runningTotalIsRecalculatedOnEachAdd() {
-    checkout.addProduct("A");
-    assertTotal(50);
-
-    checkout.addProduct("A");
-    assertTotal(100);
-
-    checkout.addProduct("A");
-    assertTotal(130);
+  @DisplayName("process replaces the basket each time")
+  void processReplacesBasket() {
+    assertProcess(Map.of("A", 1), 50);
+    assertProcess(Map.of("A", 2), 100);
+    assertProcess(Map.of("A", 3), 130);
   }
 
   @Nested
@@ -63,31 +58,25 @@ class CheckoutUseCaseTest {
     @Test
     @DisplayName("3 A cost 130")
     void exactGroup() {
-      add("A", 3);
-      assertTotal(130);
+      assertProcess(Map.of("A", 3), 130);
     }
 
     @Test
     @DisplayName("4 A cost 180 (3 for 130 + 1 at 50)")
     void withLeftover() {
-      add("A", 4);
-      assertTotal(180);
+      assertProcess(Map.of("A", 4), 180);
     }
 
     @Test
     @DisplayName("2 B cost 125")
     void twoB() {
-      add("B", 2);
-      assertTotal(125);
+      assertProcess(Map.of("B", 2), 125);
     }
 
     @Test
-    @DisplayName("scan order does not matter (B, A, B)")
+    @DisplayName("counts matter, not scan order (same as B,A,B)")
     void orderIndependent() {
-      checkout.addProduct("B");
-      checkout.addProduct("A");
-      checkout.addProduct("B");
-      assertTotal(175);
+      assertProcess(Map.of("A", 1, "B", 2), 175);
     }
   }
 
@@ -98,22 +87,19 @@ class CheckoutUseCaseTest {
     @Test
     @DisplayName("4 C cost 75 (pay 3)")
     void oneFreeItem() {
-      add("C", 4);
-      assertTotal(75);
+      assertProcess(Map.of("C", 4), 75);
     }
 
     @Test
     @DisplayName("5 C cost 100 (pay 3 + 1 unit)")
     void withRemainder() {
-      add("C", 5);
-      assertTotal(100);
+      assertProcess(Map.of("C", 5), 100);
     }
 
     @Test
     @DisplayName("3 C still cost 75 (no free item yet)")
     void noFreeYet() {
-      add("C", 3);
-      assertTotal(75);
+      assertProcess(Map.of("C", 3), 75);
     }
   }
 
@@ -124,26 +110,19 @@ class CheckoutUseCaseTest {
     @Test
     @DisplayName("D + E cost 300")
     void oneDeal() {
-      checkout.addProduct("D");
-      checkout.addProduct("E");
-      assertTotal(300);
+      assertProcess(Map.of("D", 1, "E", 1), 300);
     }
 
     @Test
-    @DisplayName("D, D, E cost 450 (one deal + leftover D)")
+    @DisplayName("2 D + 1 E cost 450 (one deal + leftover D)")
     void withLeftover() {
-      checkout.addProduct("D");
-      checkout.addProduct("D");
-      checkout.addProduct("E");
-      assertTotal(450);
+      assertProcess(Map.of("D", 2, "E", 1), 450);
     }
 
     @Test
     @DisplayName("two full deals cost 600")
     void twoDeals() {
-      add("D", 2);
-      add("E", 2);
-      assertTotal(600);
+      assertProcess(Map.of("D", 2, "E", 2), 600);
     }
   }
 
@@ -154,12 +133,7 @@ class CheckoutUseCaseTest {
     @Test
     @DisplayName("3A + 2B + 4C + D + E = 630")
     void fullWeekBasket() {
-      add("A", 3);
-      add("B", 2);
-      add("C", 4);
-      checkout.addProduct("D");
-      checkout.addProduct("E");
-      assertTotal(630);
+      assertProcess(Map.of("A", 3, "B", 2, "C", 4, "D", 1, "E", 1), 630);
     }
   }
 
@@ -176,23 +150,16 @@ class CheckoutUseCaseTest {
               List.of(new MultiPricedPromotion("A", 2, BigDecimal.valueOf(80))));
 
       CheckoutUseCase otherCheckout = CheckoutFactory.start(otherWeek);
-      otherCheckout.addProduct("A");
-      otherCheckout.addProduct("A");
-
-      assertEquals(0, otherCheckout.total().compareTo(BigDecimal.valueOf(80)));
+      assertEquals(
+          0, otherCheckout.process(Map.of("A", 2)).compareTo(BigDecimal.valueOf(80)));
     }
   }
 
-  private void add(String sku, int times) {
-    for (int i = 0; i < times; i++) {
-      checkout.addProduct(sku);
-    }
-  }
-
-  private void assertTotal(int expectedPence) {
+  private void assertProcess(Map<String, Integer> quantities, int expectedPence) {
+    BigDecimal total = checkout.process(quantities);
     assertEquals(
         0,
-        checkout.total().compareTo(BigDecimal.valueOf(expectedPence)),
-        () -> "expected " + expectedPence + " but was " + checkout.total());
+        total.compareTo(BigDecimal.valueOf(expectedPence)),
+        () -> "expected " + expectedPence + " but was " + total);
   }
 }

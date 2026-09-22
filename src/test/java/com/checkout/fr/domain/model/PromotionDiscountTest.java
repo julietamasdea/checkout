@@ -6,6 +6,11 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import com.checkout.fr.domain.model.promotion.BuyNGetOneFreePromotion;
+import com.checkout.fr.domain.model.promotion.MealDealPromotion;
+import com.checkout.fr.domain.model.promotion.MultiPricedPromotion;
+import com.checkout.fr.domain.model.promotion.Promotion;
 import org.junit.jupiter.api.Test;
 
 class PromotionDiscountTest {

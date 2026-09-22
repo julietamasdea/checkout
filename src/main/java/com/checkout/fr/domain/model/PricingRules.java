@@ -1,5 +1,6 @@
 package com.checkout.fr.domain.model;
 
+import com.checkout.fr.domain.model.promotion.Promotion;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

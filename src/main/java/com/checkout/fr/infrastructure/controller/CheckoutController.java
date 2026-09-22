@@ -1,35 +1,41 @@
 package com.checkout.fr.infrastructure.controller;
 
 import com.checkout.fr.domain.config.ThisWeekPricingRules;
+import com.checkout.fr.domain.model.exception.InvalidProductException;
 import com.checkout.fr.domain.usecase.CheckoutFactory;
 import com.checkout.fr.domain.usecase.CheckoutUseCase;
+import com.checkout.fr.infrastructure.checkout.CheckoutMapper;
+import java.util.Map;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
-/**
- * Stateless checkout: each request sends the full list of scanned SKUs and gets the total back. No
- * session — the basket is the request body.
- */
+/** Stateless checkout: maps the request, then calls domain. */
 @RestController
 @RequestMapping("/checkout")
 @CrossOrigin(origins = "*")
 public class CheckoutController {
 
+  private final CheckoutMapper checkoutMapper;
+
+  public CheckoutController(CheckoutMapper checkoutMapper) {
+    this.checkoutMapper = checkoutMapper;
+  }
+
   @PostMapping
   public ResponseEntity<CheckoutResponse> checkout(@RequestBody CheckoutRequest request) {
-    if (request == null || request.items() == null) {
-      return ResponseEntity.badRequest().build();
-    }
+    Map<String, Integer> quantities = checkoutMapper.toQuantityMap(request);
 
-    CheckoutUseCase checkout = CheckoutFactory.start(ThisWeekPricingRules.create());
-    for (String sku : request.items()) {
-      checkout.addProduct(sku);
+    try {
+      CheckoutUseCase useCase = CheckoutFactory.start(ThisWeekPricingRules.create());
+      return ResponseEntity.ok(new CheckoutResponse(useCase.process(quantities)));
+    } catch (InvalidProductException ex) {
+      throw new ResponseStatusException(HttpStatus.BAD_REQUEST, ex.getMessage());
     }
-
-    return ResponseEntity.ok(new CheckoutResponse(checkout.total()));
   }
 }

@@ -1,5 +1,7 @@
-package com.checkout.fr.domain.model;
+package com.checkout.fr.domain.model.promotion;
 
+import com.checkout.fr.domain.model.PricingRules;
+import com.checkout.fr.domain.model.PromotionType;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Optional;

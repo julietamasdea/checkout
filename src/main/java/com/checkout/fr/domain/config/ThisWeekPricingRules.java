@@ -1,10 +1,10 @@
 package com.checkout.fr.domain.config;
 
-import com.checkout.fr.domain.model.BuyNGetOneFreePromotion;
-import com.checkout.fr.domain.model.MealDealPromotion;
-import com.checkout.fr.domain.model.MultiPricedPromotion;
 import com.checkout.fr.domain.model.PricingRules;
 import com.checkout.fr.domain.model.Product;
+import com.checkout.fr.domain.model.promotion.BuyNGetOneFreePromotion;
+import com.checkout.fr.domain.model.promotion.MealDealPromotion;
+import com.checkout.fr.domain.model.promotion.MultiPricedPromotion;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
